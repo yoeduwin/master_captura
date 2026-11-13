@@ -22,8 +22,29 @@ select.tool{max-width:230px}
 .warnbox{background:#F8CBAD;color:#843C0C;border-left:4px solid #C65911;padding:7px 10px;margin:0 0 9px}
 .warnbox b{display:block;margin-bottom:2px}
 .btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-label.modo{font-weight:700;color:#1F4E78;white-space:nowrap}
-#modobar{flex:none;background:#DDEBF7;color:#1F4E78;padding:3px 8px;font-size:10pt;font-weight:700}
+.tipo{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.tipo>span{font-weight:700;color:#1F4E78}
+.seg{display:inline-flex;border:1px solid #1F4E78;border-radius:3px;overflow:hidden;background:#fff}
+.seg button{border:0;border-radius:0;background:#fff;color:#1F4E78;padding:3px 11px;font-weight:400}
+.seg button+button{border-left:1px solid #1F4E78}
+.seg button:hover{background:#DDEBF7}
+.seg button[aria-checked=true]{background:#1F4E78;color:#fff;font-weight:700}
+.seg button[aria-checked=true]::before{content:"✓ "}
+.seg button:focus-visible{outline:2px solid #107C41;outline-offset:-3px}
+#modobar{flex:none;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;background:#DDEBF7;color:#1F4E78;border-bottom:1px solid #9DC3E6;padding:4px 8px;font-size:10pt}
+#modobar b{font-weight:700}
+#modobar span{color:#2F5597}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 8px}
+.pick button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;border:1px solid #ABABAB;border-radius:4px;background:#fff;padding:12px 13px;font-size:10pt;line-height:1.3;cursor:pointer}
+.pick button:hover{border-color:#2E75B6;background:#F3F8FC}
+.pick button:focus-visible{outline:2px solid #107C41;outline-offset:1px}
+.pick .t{font-size:12pt;font-weight:700;color:#1F4E78}
+.pick .n{display:inline-block;background:#1F4E78;color:#fff;border-radius:9px;padding:0 8px;font-size:9pt;font-weight:700}
+.pick .d{color:#404040}
+.pick .x{color:#7F7F7F;font-size:9pt}
+.tag{display:inline-block;font-size:8.5pt;line-height:1.5;padding:0 7px;border-radius:9px;background:#F2F2F2;color:#595959;margin-right:6px;vertical-align:1px}
+.tag.nuevo{background:#DDEBF7;color:#1F4E78;font-weight:700}
+@media (max-width:620px){.pick{grid-template-columns:1fr}.tipo>span{display:none}}
 #tabbar{flex:none;background:#F8CBAD;color:#843C0C;padding:3px 8px;font-size:10pt;font-weight:700}
 #warnbar{flex:none;background:#FFC7CE;color:#9C0006;padding:3px 8px;font-size:10pt}
 #sheet{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
@@ -103,7 +124,7 @@ dialog::backdrop{background:rgba(0,0,0,.2)}
 </head>
 <body>
 <div id="bar">
- <label class="modo">Tipo de equipo <select class="tool" id="modo"><option value="completo">Con pruebas (captura completa)</option><option value="nuevo">Equipo nuevo sin pruebas</option></select></label>
+ <div class="tipo"><span id="tipoLbl">Tipo de equipo</span><div class="seg" id="seg" role="radiogroup" aria-labelledby="tipoLbl"><button type="button" role="radio" data-modo="completo" aria-checked="true">Con pruebas</button><button type="button" role="radio" data-modo="nuevo" aria-checked="false">Equipo nuevo sin pruebas</button></div></div>
  <select class="tool" id="jump" aria-label="Ir a sección"></select>
  <button id="bExpand" title="Muestra todas las secciones">Expandir todo</button>
  <button id="bCollapse" title="Oculta el contenido de todas las secciones">Contraer todo</button>
@@ -477,6 +498,12 @@ var MC = (function () {
     return o;
   }
   function normModo(m) { return m === 'nuevo' ? 'nuevo' : 'completo'; }
+  var TOTAL_N = SECS.reduce(function (a, s) { return a + s.rows.filter(function (r) { return r.key; }).length; }, 0), chooser = null;
+  function paintSeg() {
+    document.querySelectorAll('#seg button').forEach(function (b) { b.setAttribute('aria-checked', String(b.getAttribute('data-modo') === modo)); });
+  }
+  function tagModo(m) { return m === 'nuevo' ? '<span class="tag nuevo">Equipo nuevo sin pruebas</span>' : '<span class="tag">Con pruebas</span>'; }
+  function draftVacio(d) { return !d || !Object.keys(d.v || {}).length; }
 
   function h(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function uid() { return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
@@ -756,20 +783,46 @@ var MC = (function () {
     $('jump').innerHTML = '<option value="">Ir a sección…</option>' + SECS.map(function (s, i) { return nuevo() && SECEXCL[i] ? '' : '<option value="' + s.hr + '">' + s.n + '. ' + h(s.title) + '</option>'; }).join('');
   }
   function setModoUI() {
-    $('modo').value = modo;
+    paintSeg();
     $('modobar').hidden = !nuevo();
-    $('modobar').textContent = 'Equipo nuevo sin pruebas: solo se muestran y se exportan los ' + NUEVO_N + ' datos que el Motor importa para equipo nuevo. Lo demás va en blanco en el Excel.';
+    $('modobar').innerHTML = '<b>Equipo nuevo sin pruebas · ' + NUEVO_N + ' de ' + TOTAL_N + ' datos</b><span>Solo ves y se exporta lo que el Motor importa para equipo nuevo. Geometría, espesores UT, partículas magnéticas, evidencia y fechas de inspección van en blanco.</span>';
     buildJump();
     SECS.forEach(function (s, i) { applyRows(i); });
   }
   function setModo(m) { modo = normModo(m); setModoUI(); refresh(); touch(); }
-  $('modo').onchange = function () {
-    var m = this.value;
+  function requestModo(m) {
+    if (m === modo) return;
     if (m !== 'nuevo') { setModo(m); return; }
     var n = Object.keys(vals).filter(function (c) { return EXCLROW[rowNum(c)] && (vals[c] || '').trim(); }).length;
     if (!n) { setModo(m); return; }
-    showDialog('Cambiar a equipo nuevo sin pruebas', '<div class="warnbox"><b>Hay ' + n + ' dato(s) capturado(s) que no aplican a equipo nuevo.</b>Por ejemplo, lecturas UT, elementos, zonas o fechas de inspección. Se ocultan y no se exportan al Excel; se conservan en el borrador por si vuelves a «Con pruebas».</div><div class="btns"><button class="pri" data-d="modoOK" data-m="nuevo">Cambiar</button><button data-d="modoNo">Cancelar</button></div>');
-  };
+    showDialog('Cambiar a equipo nuevo sin pruebas', '<div class="warnbox"><b>Hay ' + n + ' dato(s) capturado(s) que no aplican a equipo nuevo.</b>Por ejemplo, lecturas UT, elementos, zonas o fechas de inspección. Se ocultan y no se exportan al Excel; se conservan en el borrador por si vuelves a «Con pruebas».</div><div class="btns"><button class="pri" data-d="modoOK" data-m="nuevo">Cambiar a equipo nuevo</button><button data-d="modoNo">Cancelar</button></div>');
+  }
+  $('seg').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-modo]');
+    if (!b) return;
+    commitActive();
+    if (!pendingRestore) requestModo(b.getAttribute('data-modo'));
+  });
+  $('seg').addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    var bs = [].slice.call(document.querySelectorAll('#seg button')), i = bs.indexOf(document.activeElement), j = (i + (e.key === 'ArrowRight' ? 1 : -1) + bs.length) % bs.length;
+    bs[j].focus();
+  });
+  /* Al empezar un borrador se elige el tipo de equipo; en uno nuevo no se puede saltar. */
+  function drawChooser(paraNuevo) {
+    chooser = paraNuevo ? 'nuevo' : 'inicio';
+    $('dlgX').hidden = !paraNuevo;
+    function card(m, t, d, x, n) {
+      return '<button type="button" data-d="pick" data-m="' + m + '"><span class="t">' + t + '</span><span class="n">' + n + ' datos</span><span class="d">' + d + '</span><span class="x">' + x + '</span></button>';
+    }
+    showDialog(paraNuevo ? 'Nuevo borrador: ¿qué equipo vas a capturar?' : '¿Qué equipo vas a capturar?',
+      '<div class="pick">' +
+      card('completo', 'Equipo con pruebas', 'Inspección completa en campo: placa, operación, expediente y condiciones de seguridad, más geometría, espesores UT, partículas magnéticas y evidencia de material.', 'La hoja completa, como en Excel.', TOTAL_N) +
+      card('nuevo', 'Equipo nuevo sin pruebas', 'Solo lo que el Motor importa para un equipo nuevo: placa, operación, válvula, manómetro, expediente NOM-020 y condiciones de seguridad.', 'Sin geometría, espesores UT, partículas magnéticas, evidencia ni fechas de inspección.', NUEVO_N) +
+      '</div><p class="note">Puedes cambiarlo después en «Tipo de equipo», arriba.</p>');
+    var first = $('dlgB').querySelector('[data-d=pick]'); if (first) first.focus();
+  }
   function revealRow(r) {
     SECS.forEach(function (s, i) { var g = secRange(i); if (r >= s.hr && r <= g[1] && folded[s.n]) { setFold(i, false); refreshSums(); } });
   }
@@ -786,13 +839,14 @@ var MC = (function () {
     $('dlg').close();
     if (pendingRestore) { var el = pendingRestore, c = el.getAttribute('data-c'); pendingRestore = null; el.value = vals[c] || ''; grow(el); el.focus(); }
   }
-  $('dlg').addEventListener('close', function () { $('modo').value = modo; if (pendingRestore) closeDialog(); });
+  $('dlg').addEventListener('close', function () { paintSeg(); chooser = null; $('dlgX').hidden = false; if (pendingRestore) closeDialog(); });
+  $('dlg').addEventListener('cancel', function (e) { if (chooser === 'inicio') e.preventDefault(); });
   $('dlgX').onclick = closeDialog;
   function drawDrafts() {
     var ids = Object.keys(drafts).sort(function (a, b) { return drafts[b].upd.localeCompare(drafts[a].upd); });
-    showDialog('Borradores en este navegador', '<p class="btns" style="margin:0 0 6px"><button class="pri" data-d="new" data-m="completo">Nuevo · con pruebas</button><button class="pri" data-d="new" data-m="nuevo">Nuevo · equipo nuevo sin pruebas</button></p>' + ids.map(function (id) {
+    showDialog('Borradores en este navegador', '<p style="margin:0 0 6px"><button class="pri" data-d="new">Nuevo borrador</button></p>' + ids.map(function (id) {
       var d = drafts[id];
-      return '<div class="dr"><div><b>' + h(draftName(d.v)) + '</b><small>' + (d.modo === 'nuevo' ? 'Equipo nuevo sin pruebas · ' : '') + (id === cur ? 'Abierto · ' : '') + new Date(d.upd).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) + '</small></div><div class="acts">' +
+      return '<div class="dr"><div><b>' + h(draftName(d.v)) + '</b><small>' + tagModo(d.modo) + (id === cur ? 'Abierto · ' : '') + new Date(d.upd).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) + '</small></div><div class="acts">' +
         (id === cur ? '' : '<button data-d="open" data-id="' + id + '">Abrir</button>') +
         '<button data-d="dup" data-id="' + id + '" title="Copia para otro equipo del mismo cliente">Duplicar</button>' +
         '<button data-d="del" data-id="' + id + '">Eliminar</button></div></div>';
@@ -814,8 +868,15 @@ var MC = (function () {
     var a = t.getAttribute('data-d'), id = t.getAttribute('data-id'), n;
     if (a === 'closeErr') closeDialog();
     if (a === 'modoOK') { $('dlg').close(); setModo(t.getAttribute('data-m')); return; }
-    if (a === 'modoNo') { $('dlg').close(); $('modo').value = modo; return; }
-    if (a === 'new') { n = uid(); drafts[n] = { id: n, upd: new Date().toISOString(), v: {}, modo: normModo(t.getAttribute('data-m')) }; $('dlg').close(); openDraft(n); }
+    if (a === 'modoNo') { $('dlg').close(); paintSeg(); return; }
+    if (a === 'pick') {
+      var pm = normModo(t.getAttribute('data-m')), was = chooser;
+      $('dlg').close();
+      if (was === 'nuevo') { n = uid(); drafts[n] = { id: n, upd: new Date().toISOString(), v: {}, modo: pm }; openDraft(n); }
+      else { modo = pm; setModoUI(); refresh(); saveNow(); }
+      return;
+    }
+    if (a === 'new') { drawChooser(true); return; }
     if (a === 'open') { $('dlg').close(); openDraft(id); }
     if (a === 'dup') {
       showDialog('Duplicar borrador', '<div class="warnbox"><b>Se copiará todo, también las mediciones del equipo original.</b>Antes de generar el Excel, actualiza TAG, serie, espesores, evidencia de material y fechas del nuevo equipo.</div><p style="margin:0">' + h(draftName(drafts[id].v)) + '</p><div class="btns"><button class="pri" data-d="dupOK" data-id="' + id + '">Duplicar</button><button data-d="dupNo">Cancelar</button></div>');
@@ -884,6 +945,7 @@ var MC = (function () {
   initFolds();
   setModoUI();
   fillAll();
+  if (!drafts[cur].modo && draftVacio(drafts[cur])) drawChooser(false);
 })();
 </script>
 </body>
