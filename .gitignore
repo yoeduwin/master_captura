@@ -1,0 +1,4 @@
+# Plantilla original: trae rutas locales y datos de libros vinculados. No subir.
+*.xlsx
+*.xlsm
+.claude/

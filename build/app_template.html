@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master_Captura</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;background:#fff;color:#000;font:11pt Calibri,Carlito,Arial,sans-serif;overflow:hidden}
+[hidden]{display:none!important}
+button,select.tool{font:10pt Calibri,Carlito,Arial,sans-serif;color:#000;background:#fff;border:1px solid #ABABAB;border-radius:2px;padding:3px 10px;cursor:pointer}
+button:hover{background:#F2F2F2}
+button.pri{background:#1F4E78;border-color:#1F4E78;color:#fff;font-weight:700}
+button.pri:hover{background:#2E75B6}
+button:disabled{background:#D9D9D9;border-color:#D9D9D9;color:#595959;cursor:not-allowed}
+#bar{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px 8px;background:#F2F2F2;border-bottom:1px solid #ABABAB;font-size:10pt}
+#equipo{flex:1 1 140px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#595959}
+#saved{color:#595959;white-space:nowrap}
+select.tool{max-width:230px}
+#aviso{color:#843C0C;font-size:9.5pt;white-space:nowrap}
+.warnbox{background:#F8CBAD;color:#843C0C;border-left:4px solid #C65911;padding:7px 10px;margin:0 0 9px}
+.warnbox b{display:block;margin-bottom:2px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+label.modo{font-weight:700;color:#1F4E78;white-space:nowrap}
+#modobar{flex:none;background:#DDEBF7;color:#1F4E78;padding:3px 8px;font-size:10pt;font-weight:700}
+#tabbar{flex:none;background:#F8CBAD;color:#843C0C;padding:3px 8px;font-size:10pt;font-weight:700}
+#warnbar{flex:none;background:#FFC7CE;color:#9C0006;padding:3px 8px;font-size:10pt}
+#sheet{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+table.ws{border-collapse:collapse;table-layout:fixed}
+table.ws thead{position:sticky;top:0;z-index:5;background:#fff;box-shadow:0 1px 0 #808080}
+table.ws td{border:1px solid #D4D4D4;padding:0 2px;line-height:1.15}
+td.in{padding:0;cursor:cell}
+td.in input,td.in select,td.in textarea{display:block;width:100%;margin:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;text-align:inherit;padding:1px 2px;line-height:1.15;outline:0}
+td.in textarea{resize:none;overflow:hidden;height:auto;white-space:pre-wrap}
+td.in select{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:14px;text-overflow:ellipsis}
+td.in select:focus{appearance:auto;-webkit-appearance:auto}
+td.in input[type=date],td.in input[type=time]{min-width:0}
+td.in:focus-within{outline:2px solid #107C41;outline-offset:-2px;position:relative;z-index:2}
+td.num{text-align:right}
+tr.sec{cursor:pointer}
+button.tg{border:0;background:none;padding:0;margin:0 4px 0 0;width:14px;font:inherit;color:inherit;cursor:pointer}
+button.tg:hover{background:none}
+button.tg:focus-visible{outline:2px solid #107C41}
+.secsum{font-weight:400;margin-left:10px}
+.secsum.err{color:#C00000}.secsum.fal{color:#C65911}.secsum.rev{color:#2E75B6}.secsum.ok{color:#008000}
+td.in input.vac:not(:focus){color:transparent}
+td.in input.vac:not(:focus)::-webkit-datetime-edit{color:transparent}
+td.in input.vac:not(:focus)::-webkit-calendar-picker-indicator{opacity:0}
+#tip{position:fixed;z-index:30;max-width:290px;background:#FFFFE1;border:1px solid #767676;padding:4px 7px;font-size:9.5pt;line-height:1.25;box-shadow:1px 1px 3px rgba(0,0,0,.25);pointer-events:none}
+#tip b{display:block}
+dialog{border:1px solid #767676;border-radius:3px;padding:0;width:min(640px,calc(100vw - 24px));max-height:82vh;font-size:10.5pt}
+dialog::backdrop{background:rgba(0,0,0,.2)}
+.dh{background:#1F4E78;color:#fff;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.dh button{background:none;border:0;color:#fff;font-size:15pt;line-height:1;padding:0 3px}
+.dh button:hover{background:#2E75B6}
+.db{padding:10px 12px;overflow:auto;max-height:calc(82vh - 40px)}
+.dr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:7px 0;border-bottom:1px solid #D4D4D4;align-items:center}
+.dr b{display:block;overflow-wrap:anywhere}
+.dr small{color:#595959}
+.dr .acts{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.danger{color:#9C0006;border-color:#9C0006}
+.note{color:#595959;font-size:9.5pt;margin:9px 0 0}
+.iss{list-style:none;padding:0;margin:9px 0 0}
+.iss button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #D4D4D4;border-radius:0;background:none;padding:4px 2px;font-size:10pt}
+.iss button:hover{background:#F2F2F2}
+.iss .err{color:#C00000}.iss .fal{color:#C65911}.iss .rev{color:#2E75B6}
+.sum{font-weight:700;color:#1F4E78;margin:0 0 8px}
+.e{color:#9C0006;margin:0 0 8px}
+#toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#fff;border:1px solid #767676;padding:6px 12px;font-size:10pt;box-shadow:0 1px 6px rgba(0,0,0,.25);z-index:40;max-width:calc(100vw - 24px)}
+#toast.bad{border-color:#C00000;color:#9C0006}
+__SHEET_CSS__
+</style>
+</head>
+<body>
+<div id="bar">
+ <label class="modo">Tipo de equipo <select class="tool" id="modo"><option value="completo">Con pruebas (captura completa)</option><option value="nuevo">Equipo nuevo sin pruebas</option></select></label>
+ <select class="tool" id="jump" aria-label="Ir a sección"></select>
+ <button id="bExpand" title="Muestra todas las secciones">Expandir todo</button>
+ <button id="bCollapse" title="Oculta el contenido de todas las secciones">Contraer todo</button>
+ <button id="bDrafts">Borradores</button>
+ <button id="bSave" title="Descarga el borrador como archivo JSON">Guardar JSON</button>
+ <button id="bOpen" title="Abre un borrador JSON guardado antes">Abrir JSON</button>
+ <button id="bGen" class="pri">Generar Excel</button>
+ <span id="equipo"></span>
+ <span id="aviso">Se guarda solo en este navegador. Usa «Guardar JSON» para respaldar.</span>
+ <span id="saved"></span>
+</div>
+<div id="warnbar" hidden>Este navegador no permite guardar automáticamente. Usa «Guardar JSON» para no perder la captura.</div>
+<div id="modobar" hidden></div>
+<div id="tabbar" hidden>Esta captura está abierta en otra pestaña. Trabaja en una sola para no sobrescribir lo capturado.</div>
+<div id="sheet"></div>
+<div id="tip" hidden></div>
+<dialog id="dlg"><div class="dh"><span id="dlgT"></span><button id="dlgX" aria-label="Cerrar">×</button></div><div class="db" id="dlgB"></div></dialog>
+<input type="file" id="file" accept=".json,application/json" hidden>
+<div id="toast" hidden role="status"></div>
+
+<script id="meta" type="application/json">__META__</script>
+<script id="parts" type="application/json">__PARTS__</script>
+<script id="cf">var MC_CF = function (C, Rng, AND, OR, NOT, ISNUMBER, LEFT, COUNTA) { return __CF__; };</script>
+<script id="engine">
+/* ---- Motor: sin DOM. Replica la columna L de la plantilla y escribe el .xlsx. ---- */
+var MC = (function () {
+  var meta, parts, COL = ['D', 'E', 'F', 'G', 'H', 'I'], cellSpec = {}, rowSec = {}, rowOf = {}, cfRules = [], statics = {}, base = {}, curVals = {}, curCalc = {};
+  function init(m, p) {
+    meta = m; parts = p;
+    m.grid.rows.forEach(function (rw) { rw.c.forEach(function (x) { base[x.c + rw.r] = x.s; if (x.v != null && !x.f) statics[x.c + rw.r] = x.v; }); });
+    cfRules = MC_CF(cfCell, cfRange, function () { return [].every.call(arguments, Boolean); }, function () { return [].some.call(arguments, Boolean); }, function (a) { return !a; },
+      function (a) { return typeof a === 'number'; }, function (a, n) { return String(a).slice(0, n); }, function (a) { return a.filter(function (x) { return x !== ''; }).length; });
+    m.sections.forEach(function (s) {
+      s.rows.forEach(function (r) {
+        rowSec[r.r] = s; rowOf[r.r] = r;
+        Object.keys(r.cells || {}).forEach(function (c) { cellSpec[c + r.r] = r.cells[c]; });
+      });
+    });
+  }
+  var NUM = /^[-+]?(\d+(\.\d*)?|\.\d+)$/;
+  /* Valor tipado como lo vería Excel: "" (en blanco), número o texto. */
+  function typed(coord, raw) {
+    var s = cellSpec[coord], v = raw == null ? '' : String(raw).trim();
+    if (v === '') return '';
+    if (s.k === 'num' || s.k === 'int') return NUM.test(v) ? Number(v) : v;
+    if (s.k === 'date') {
+      var d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+      return d ? Math.round((Date.UTC(+d[1], d[2] - 1, +d[3]) - Date.UTC(1899, 11, 30)) / 864e5) : v;
+    }
+    if (s.k === 'time') {
+      var t = /^(\d{1,2}):(\d{2})/.exec(v);
+      return t ? (+t[1] * 60 + +t[2]) / 1440 : v;
+    }
+    return v;
+  }
+  function review(vals) {
+    function T(c) { return typed(c, vals[c]); }
+    function isN(v) { return typeof v === 'number'; }
+    function R(r) { return COL.map(function (c) { return T(c + r); }); }
+    var out = {}, MN = 'Error: debe ser número, sin texto ni unidades', M0 = 'Error: debe ser mayor que 0', MF = 'Error: debe ser fecha (dd/mm/aaaa)';
+    var d = function (r) { return T('D' + r); };
+    function L(r, v) { out['L' + r] = v; }
+    function req(r) { L(r, d(r) === '' ? 'Falta' : '✔'); }
+    [7, 8, 9, 10, 11, 12, 14, 15, 16, 24, 42, 43, 44, 50, 51, 52, 53, 81, 82, 85, 90, 91, 97, 98, 100, 102, 105, 106, 107, 108, 109, 110, 111, 112, 114, 115, 116, 117, 118].forEach(req);
+    for (var i = 121; i <= 139; i++) req(i);
+    function opt(r, m) { L(r, d(r) === '' ? m : '✔'); }
+    opt(54, '— En blanco'); opt(55, '— En blanco'); opt(92, '— Sin observaciones'); opt(96, '— En trámite');
+    var D13 = d(13), D19 = d(19), D20 = d(20), D21 = d(21), D22 = d(22), D23 = d(23), D27 = d(27), D28 = d(28), D45 = d(45), D46 = d(46), D47 = d(47), D86 = d(86), D87 = d(87), D88 = d(88), D89 = d(89), D95 = d(95), D99 = d(99), D101 = d(101), D103 = d(103), D104 = d(104), D113 = d(113);
+    L(13, D13 === '' ? '— En blanco' : !(isN(D13) && D13 === Math.floor(D13)) ? 'Error: debe ser número entero' : D13 < 1900 ? 'Error: año fuera de rango' : isN(D86) && D13 > new Date(Date.UTC(1899, 11, 30) + D86 * 864e5).getUTCFullYear() ? 'Revisar: posterior a la inspección' : '✔');
+    L(19, D19 === '' ? 'Falta' : !isN(D19) ? MN : D19 <= 0 ? M0 : '✔');
+    L(20, D20 === '' ? 'Falta' : !isN(D20) ? MN : D20 <= 0 ? M0 : '✔');
+    L(21, D21 === '' ? '— En blanco' : !isN(D21) ? MN : D21 <= 0 ? M0 : isN(D20) && D21 < D20 ? 'Revisar: menor que la presión de diseño' : '✔');
+    L(22, D22 === '' ? 'Falta' : !isN(D22) ? MN : '✔');
+    L(23, D23 === '' ? '— En blanco' : !isN(D23) ? MN : D23 <= 0 ? M0 : isN(D20) && D23 < D20 ? 'Revisar: menor que la presión de diseño' : '✔');
+    L(27, D27 === '' ? 'Falta' : !isN(D27) ? MN : D27 <= 0 ? M0 : isN(D20) && D27 >= D20 ? 'Revisar: igual o mayor que la presión de diseño' : '✔');
+    L(28, D28 === '' ? 'Falta' : !isN(D28) ? MN : '✔');
+    L(45, D45 === '' ? 'Falta' : !isN(D45) ? MN : D45 <= 0 ? M0 : isN(D20) && D45 * 98.0665 > D20 * 1.0001 ? 'Revisar: mayor que la presión de diseño' : isN(D27) && D45 * 98.0665 <= D27 ? 'Revisar: menor o igual que la de operación' : '✔');
+    L(46, D46 === '' ? '— En blanco' : !isN(D46) ? MF : '✔');
+    L(47, D47 === '' ? '— En blanco' : !isN(D47) ? MN : D47 <= 0 ? M0 : '✔');
+    L(113, D113 === '' ? '— En blanco' : !isN(D113) ? MF : '✔');
+    L(86, D86 === '' ? 'Falta' : !isN(D86) ? MF : '✔');
+    L(87, D87 === '' ? 'Falta' : !isN(D87) ? MF : isN(D86) && D87 < D86 ? 'Error: anterior a la fecha de inspección' : '✔');
+    L(88, D88 === '' ? 'Falta' : !(isN(D88) && D88 < 1) ? 'Error: debe ser hora (hh:mm)' : '✔');
+    L(89, D89 === '' ? 'Falta' : !(isN(D89) && D89 < 1) ? 'Error: debe ser hora (hh:mm)' : isN(D88) && D89 <= D88 ? 'Error: debe ser posterior a la hora de inicio' : '✔');
+    var cat = D95 === '' ? 'Falta' : '✔';
+    if (D95 !== '' && (D99 === 'No peligroso' || D99 === 'Peligroso') && isN(D45) && isN(D19)) {
+      var ex = D99 === 'Peligroso' ? (D45 <= 7 && D19 <= 1000 ? 'II' : 'III') : (D45 <= 5 ? (D19 <= 500 ? 'I' : 'II') : (D45 <= 8 ? (D19 <= 1000 ? 'II' : 'III') : 'III'));
+      cat = D95 === ex ? '✔' : 'Revisar: por fluido, Pcal y capacidad sería Cat. ' + ex;
+    }
+    L(95, cat);
+    L(99, D99 === '' ? 'Falta' : (D99 === 'No peligroso' || D99 === 'Peligroso') ? '✔' : 'Error: elige No peligroso o Peligroso');
+    L(101, D101 === '' ? 'Falta' : !(isN(D101) && D101 === Math.floor(D101)) ? 'Error: debe ser número entero' : D101 < 1 ? 'Error: debe ser 1 o más' : '✔');
+    L(103, D103 === '' ? 'Falta' : !isN(D103) ? MN : D103 <= 0 ? M0 : isN(D104) && D103 >= D104 ? 'Error: debe ser menor que la presión de paro' : '✔');
+    L(104, D104 === '' ? 'Falta' : !isN(D104) ? MN : D104 <= 0 ? M0 : isN(D103) && D104 <= D103 ? 'Error: debe ser mayor que la de arranque' : isN(D45) && D104 >= D45 ? 'Revisar: igual o mayor que la calibración de la válvula' : '✔');
+
+    /* Elementos */
+    var N = R(32), TP = R(33), nn = N.filter(function (x) { return x !== ''; }).length, last = 0;
+    N.forEach(function (x, j) { if (x !== '') last = j + 1; });
+    L(32, nn === 0 ? 'Falta: al menos un elemento' : nn !== last ? 'Error: no saltes columnas' : '✔ ' + nn + ' elemento(s)');
+    function cnt(a, f) { return a.reduce(function (s, x, j) { return s + (f(x, j) ? 1 : 0); }, 0); }
+    function orphan(a) { return cnt(a, function (x, j) { return x !== '' && N[j] === ''; }); }
+    function missing(a) { return cnt(a, function (x, j) { return x === '' && N[j] !== ''; }); }
+    function badN(a) { return cnt(a, function (x) { return x !== '' && (!isN(x) || x <= 0); }); }
+    var EO = 'Error: dato en un elemento sin nombre';
+    [33, 34, 39].forEach(function (r) {
+      var a = R(r), m = missing(a);
+      L(r, orphan(a) ? EO : m ? 'Falta en elementos (' + m + ')' : '✔');
+    });
+    var a35 = R(35), m35 = missing(a35);
+    L(35, orphan(a35) ? EO : badN(a35) ? 'Error: debe ser número mayor que 0' : m35 ? 'Falta en elementos (' + m35 + ')' : '✔');
+    var a36 = R(36), m36 = cnt(a36, function (x, j) { return N[j] !== '' && TP[j] === 'Cilíndrico' && x === ''; });
+    L(36, cnt(a36, function (x, j) { return x !== '' && (N[j] === '' || (TP[j] !== '' && TP[j] !== 'Cilíndrico')); }) ? 'Error: longitud solo en cilíndricos; en tapas va en blanco' : badN(a36) ? 'Error: debe ser número mayor que 0' : m36 ? 'Falta en cilíndricos (' + m36 + ')' : '✔');
+    var a37 = R(37), m37 = cnt(a37, function (x, j) { return N[j] !== '' && TP[j] === 'Cónica' && x === ''; }), any37 = cnt(a37, function (x) { return x !== ''; });
+    L(37, cnt(a37, function (x, j) { return x !== '' && (N[j] === '' || TP[j] === 'Cilíndrico' || TP[j] === 'Plana'); }) ? 'Error: en blanco en cilíndricos y tapas planas' : badN(a37) ? 'Error: debe ser número mayor que 0' : m37 ? 'Falta: obligatoria en tapas cónicas (' + m37 + ')' : !any37 ? '— En blanco' : '✔');
+    var a38 = R(38);
+    L(38, orphan(a38) ? EO : badN(a38) ? 'Error: debe ser número mayor que 0' : !cnt(a38, function (x) { return x !== ''; }) ? '— En blanco' : '✔');
+
+    /* UT */
+    var sinLect = 0;
+    COL.forEach(function (c, j) {
+      if (N[j] === '') return;
+      var h = false;
+      for (var r = 59; r <= 78; r++) if (isN(T(c + r))) h = true;
+      if (!h) sinLect++;
+    });
+    L(58, nn === 0 ? '' : sinLect > 0 ? 'Falta: hay elementos sin lecturas' : '✔ Todos los elementos tienen lecturas');
+    COL.forEach(function (c, j) { out[c + '58'] = N[j] === '' ? 'Elemento ' + (j + 1) : String(N[j]); });
+    for (var r = 59; r <= 78; r++) {
+      var a = R(r);
+      L(r, !cnt(a, function (x) { return x !== ''; }) ? '— En blanco' : orphan(a) ? 'Error: lectura en un elemento sin nombre' : badN(a) ? 'Error: debe ser número mayor que 0' : cnt(a, function (x, j) { var n = a38[j]; return isN(x) && isN(n) && n > 0 && (x > n * 1.5 || x < n * 0.5); }) ? 'Revisar: lejos del espesor nominal' : '✔');
+    }
+    /* Partículas magnéticas */
+    for (r = 143; r <= 150; r++) {
+      var z = ['D', 'E', 'F', 'G', 'H'].map(function (c) { return T(c + r); });
+      L(r, z.every(function (x) { return x === ''; }) ? '— Sin zona' : z[0] === '' ? 'Error: falta el nombre de la zona' : z.slice(1).some(function (x) { return x === ''; }) ? 'Falta: completa las 5 columnas' : !isN(z[2]) ? 'Error: extensión debe ser número (mm)' : '✔');
+    }
+    /* Evidencia */
+    var C = R(153), I = R(154), mC = missing(C), mI = missing(I);
+    var mis = cnt(C, function (x, j) {
+      var t = TP[j];
+      if (t === 'Cilíndrico') return x === 'Tapa formada (bombeada)' || x === 'Tapa plana';
+      if (t === 'Elipsoidal 2:1' || t === 'Hemisférica' || t === 'Toriesférica') return x === 'Tapa plana' || x === 'Tubo sin costura' || x === 'Placa rolada con costura longitudinal';
+      if (t === 'Plana') return x === 'Tapa formada (bombeada)' || x === 'Tubo sin costura' || x === 'Placa rolada con costura longitudinal';
+      return false;
+    });
+    L(153, orphan(C) ? EO : mC ? 'Falta en elementos (' + mC + ')' : mis ? 'Revisar: no coincide con el tipo del elemento' : '✔');
+    L(154, orphan(I) ? EO : mI ? 'Falta en elementos (' + mI + ')' : I.indexOf('Atrae débil') >= 0 ? 'Revisar: «Atrae débil» — repite la prueba en metal limpio' : '✔');
+    var fam = COL.map(function (c, j) {
+      return N[j] === '' ? '' : I[j] === '' ? 'Falta imán' : I[j] === 'Atrae' ? 'Acero al carbono' : I[j] === 'No atrae' ? 'Inoxidable austenítico' : 'Sin definir';
+    });
+    var forma = COL.map(function (c, j) {
+      return N[j] === '' ? '' : C[j] === '' ? 'Falta' : C[j] === 'Tubo sin costura' ? 'Tubo' : C[j] === 'Pieza forjada' ? 'Forja' : 'Placa';
+    });
+    var sg = COL.map(function (c, j) { return N[j] === '' ? '(sin elemento)' : (fam[j] + '|' + forma[j]).toLowerCase(); });
+    var grp = COL.map(function (c, j) {
+      if (N[j] === '') return '';
+      var f = sg.indexOf(sg[j]) + 1, k = 0;
+      for (var q = 1; q <= 6; q++) if (sg.indexOf(sg[q - 1]) + 1 === q && q <= f && N[q - 1] !== '') k++;
+      return String.fromCharCode(64 + k);
+    });
+    COL.forEach(function (c, j) { out[c + '155'] = fam[j]; out[c + '156'] = forma[j]; out[c + '157'] = grp[j]; });
+    var v157;
+    if (nn === 0) v157 = '—';
+    else if (fam.some(function (x) { return x.indexOf('Falta') === 0 || x === 'Sin definir'; }) || forma.indexOf('Falta') >= 0) v157 = '— Falta evidencia para comparar';
+    else {
+      var k = Math.max.apply(null, grp.map(function (g) { return g === '' ? 0 : g.charCodeAt(0); })) - 64;
+      v157 = k === 1 ? '✔ Un solo material en todos los elementos' : 'Revisar: ' + k + ' materiales distintos — ' + grp.map(function (g, j) { return g === '' ? '' : N[j] + ' = ' + g; }).filter(Boolean).join(' · ');
+    }
+    L(157, v157);
+    var e = 0, f2 = 0, rv = 0;
+    Object.keys(out).forEach(function (kk) {
+      if (kk[0] !== 'L') return;
+      var v = out[kk];
+      if (v.indexOf('Error') === 0) e++; else if (v.indexOf('Falta') === 0) f2++; else if (v.indexOf('Revisar') === 0) rv++;
+    });
+    out.L3 = e + ' errores · ' + f2 + ' faltantes · ' + rv + ' por revisar';
+    return out;
+  }
+  function esc(s) {
+    return String(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function patchSheet(xml, vals, calc) {
+    return xml.replace(/<c r="([A-Z]+\d+)"([^>]*?)(\/>|>([\s\S]*?)<\/c>)/g, function (m, ref, attrs, tail, inner) {
+      if (cellSpec[ref] !== undefined) {
+        var v = typed(ref, vals[ref]);
+        if (v === '') return m;
+        var s = /\bs="\d+"/.exec(attrs)[0];
+        if (typeof v === 'number') return '<c r="' + ref + '" ' + s + '><v>' + v + '</v></c>';
+        return '<c r="' + ref + '" ' + s + ' t="inlineStr"><is><t xml:space="preserve">' + esc(v) + '</t></is></c>';
+      }
+      if (calc[ref] !== undefined && inner && inner.indexOf('<f') >= 0) {
+        var f = /<f[\s\S]*?(<\/f>|\/>)/.exec(inner)[0];
+        var a = attrs.replace(/\st="[^"]*"/, '') + ' t="str"';
+        return '<c r="' + ref + '"' + a + '>' + f + '<v>' + esc(calc[ref]) + '</v></c>';
+      }
+      return m;
+    });
+  }
+  var CRC = (function () {
+    var t = [], c, n, k;
+    for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    return t;
+  })();
+  function crc32(b) { var c = -1; for (var i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ -1) >>> 0; }
+  /* ZIP sin compresión: válido para Excel y sin dependencias, funciona sin conexión. */
+  function zip(files) {
+    var enc = new TextEncoder(), chunks = [], central = [], off = 0, now = new Date();
+    var time = (now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1);
+    var date = ((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+    function hdr(sig, size, fill) { var u = new Uint8Array(size), dv = new DataView(u.buffer); dv.setUint32(0, sig, true); fill(dv); return u; }
+    files.forEach(function (f) {
+      var name = enc.encode(f[0]), data = enc.encode(f[1]), crc = crc32(data);
+      function common(dv, o) {
+        dv.setUint16(o, 20, true); dv.setUint16(o + 2, 0x0800, true); dv.setUint16(o + 4, 0, true);
+        dv.setUint16(o + 6, time, true); dv.setUint16(o + 8, date, true); dv.setUint32(o + 10, crc, true);
+        dv.setUint32(o + 14, data.length, true); dv.setUint32(o + 18, data.length, true); dv.setUint16(o + 22, name.length, true);
+      }
+      var lh = hdr(0x04034b50, 30, function (dv) { common(dv, 4); });
+      var offset = off;
+      central.push(hdr(0x02014b50, 46, function (dv) { dv.setUint16(4, 20, true); common(dv, 6); dv.setUint32(42, offset, true); }), name);
+      chunks.push(lh, name, data);
+      off += lh.length + name.length + data.length;
+    });
+    var csize = central.reduce(function (s, u) { return s + u.length; }, 0);
+    var end = hdr(0x06054b50, 22, function (dv) { dv.setUint16(8, files.length, true); dv.setUint16(10, files.length, true); dv.setUint32(12, csize, true); dv.setUint32(16, off, true); });
+    var all = chunks.concat(central, [end]), total = all.reduce(function (s, u) { return s + u.length; }, 0), res = new Uint8Array(total), p = 0;
+    all.forEach(function (u) { res.set(u, p); p += u.length; });
+    return res;
+  }
+  function buildXlsx(vals) {
+    var calc = review(vals);
+    return zip(parts.map(function (p) {
+      return [p[0], p[0] === 'xl/worksheets/sheet1.xml' ? patchSheet(p[1], vals, calc) : p[1]];
+    }));
+  }
+  /* Borrador: por clave de la columna A, para que siga siendo legible y sobreviva cambios de fila. */
+  function toDraft(vals) {
+    var v = {};
+    meta.sections.forEach(function (s) {
+      s.rows.forEach(function (r) {
+        if (!r.cells) return;
+        var cs = Object.keys(r.cells);
+        if (cs.length === 1) { if (vals['D' + r.r]) v[r.key] = vals['D' + r.r]; return; }
+        var arr = cs.map(function (c) { return vals[c + r.r] || ''; });
+        if (arr.some(Boolean)) v[r.key] = arr;
+      });
+    });
+    return v;
+  }
+  function fromDraft(v) {
+    var vals = {}, known = {}, unknown = [];
+    meta.sections.forEach(function (s) {
+      s.rows.forEach(function (r) {
+        if (!r.cells) return;
+        known[r.key] = 1;
+        var x = v[r.key], cs = Object.keys(r.cells);
+        if (x == null) return;
+        if (cs.length === 1) { if (typeof x !== 'object') vals['D' + r.r] = String(x); return; }
+        if (Array.isArray(x)) cs.forEach(function (c, i) { if (x[i] != null && x[i] !== '') vals[c + r.r] = String(x[i]); });
+      });
+    });
+    Object.keys(v).forEach(function (k) { if (!known[k]) unknown.push(k); });
+    return { vals: vals, unknown: unknown };
+  }
+  /* Formato condicional: mismas reglas y prioridades que la hoja, traducidas al generar la página. */
+  function colName(x) { return String.fromCharCode(64 + x); }
+  function cfCell(x, y) {
+    var co = colName(x) + y;
+    if (curCalc[co] !== undefined) return curCalc[co];
+    if (cellSpec[co] !== undefined) return typed(co, curVals[co]);
+    return statics[co] !== undefined ? statics[co] : '';
+  }
+  function cfRange(x1, y1, x2, y2) { var a = []; for (var y = y1; y <= y2; y++) for (var x = x1; x <= x2; x++) a.push(cfCell(x, y)); return a; }
+  function split(co) { var m = /^([A-Z]+)(\d+)$/.exec(co); return [m[1].charCodeAt(0) - 64, +m[2]]; }
+  function hasCF(co) {
+    var p = split(co);
+    return cfRules.some(function (r) { return p[0] >= r.a[0] && p[0] <= r.a[2] && p[1] >= r.a[1] && p[1] <= r.a[3]; });
+  }
+  function cfLook(co, vals, calc) {
+    var p = split(co), s = meta.grid.styles[base[co]] || {}, out = { fill: null, font: null };
+    curVals = vals; curCalc = calc;
+    for (var i = 0; i < cfRules.length; i++) {
+      var r = cfRules[i];
+      if (p[0] < r.a[0] || p[0] > r.a[2] || p[1] < r.a[1] || p[1] > r.a[3]) continue;
+      if (!r.f(p[0], p[1])) continue;
+      if (r.fill && !out.fill) out.fill = r.fill;
+      if (r.font && !out.font) out.font = r.font;
+      if (r.stop) break;
+    }
+    return { fill: out.fill, font: out.font, baseFill: s.fill || null, baseFont: s.font || null, b: !!s.b };
+  }
+  return { hasCF: hasCF, cfLook: cfLook, init: init, typed: typed, review: review, buildXlsx: buildXlsx, toDraft: toDraft, fromDraft: fromDraft, cellSpec: cellSpec, rowSec: rowSec, rowOf: rowOf, COL: COL };
+})();
+</script>
+<script id="ui">
+(function () {
+  if (typeof document === 'undefined') return;
+  var META = JSON.parse(document.getElementById('meta').textContent);
+  MC.init(META, JSON.parse(document.getElementById('parts').textContent));
+  var SECS = META.sections, KEY = 'mc_borradores_v1', KCUR = 'mc_actual_v1';
+  var $ = function (id) { return document.getElementById(id); };
+  var vals = {}, cur = null, drafts = {}, R = {}, P = {}, saveT = null, storageOK = true, styled = [], folded = {};
+  /* Equipo nuevo sin pruebas: se capturan y exportan solo las claves que importa el Motor. */
+  var modo = 'completo', EXCL = {}, EXCLROW = {}, SECEXCL = {}, SECOF = {}, NUEVO_N = 0;
+  (META.nuevoExcl || []).forEach(function (k) { EXCL[k] = 1; });
+  SECS.forEach(function (s, i) {
+    var keyed = s.rows.filter(function (r) { return r.key; });
+    keyed.forEach(function (r) { if (EXCL[r.key]) EXCLROW[r.r] = 1; else NUEVO_N++; });
+    SECEXCL[i] = keyed.length > 0 && keyed.every(function (r) { return EXCL[r.key]; });
+  });
+  function nuevo() { return modo === 'nuevo'; }
+  function rowNum(c) { return +c.replace(/^[A-Z]+/, ''); }
+  function excluded(c) { return nuevo() && !!EXCLROW[rowNum(c)]; }
+  function effVals() {
+    if (!nuevo()) return vals;
+    var o = {};
+    Object.keys(vals).forEach(function (c) { if (!EXCLROW[rowNum(c)]) o[c] = vals[c]; });
+    return o;
+  }
+  function normModo(m) { return m === 'nuevo' ? 'nuevo' : 'completo'; }
+
+  function h(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function uid() { return 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function toast(m, bad) { var t = $('toast'); t.textContent = m; t.className = bad ? 'bad' : ''; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 4200); }
+
+  /* ---------- Almacenamiento ---------- */
+  function readStore() {
+    try { drafts = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; cur = localStorage.getItem(KCUR); }
+    catch (e) { storageOK = false; drafts = {}; }
+  }
+  function writeStore() {
+    try { localStorage.setItem(KEY, JSON.stringify(drafts)); localStorage.setItem(KCUR, cur); return true; }
+    catch (e) { storageOK = false; $('warnbar').hidden = false; return false; }
+  }
+  function syncStore() {
+    try { var d = JSON.parse(localStorage.getItem(KEY) || '{}'); if (d) drafts = d; } catch (e) {}
+  }
+  function saveNow() {
+    clearTimeout(saveT); saveT = null;
+    syncStore();
+    drafts[cur] = { id: cur, upd: new Date().toISOString(), v: MC.toDraft(vals), modo: modo };
+    $('saved').textContent = writeStore() ? 'Guardado ' + new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }) : 'Sin guardar';
+  }
+  function touch() { $('saved').textContent = 'Guardando…'; clearTimeout(saveT); saveT = setTimeout(saveNow, 400); }
+  function openDraft(id) {
+    if (saveT) saveNow();
+    cur = id; vals = MC.fromDraft((drafts[id] || {}).v || {}).vals;
+    modo = normModo((drafts[id] || {}).modo);
+    writeStore();
+    setModoUI(); fillAll(); foldAll(true); $('sheet').scrollTop = 0;
+  }
+  function draftName(v) { return [v.cap_Folio, v.cap_TAG, v.cap_Cliente].filter(Boolean).join(' · ') || 'Borrador sin datos'; }
+  function safeName(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 60); }
+  function download(name, data, type) {
+    var u = URL.createObjectURL(new Blob([data], { type: type })), a = document.createElement('a');
+    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 5000);
+  }
+  function baseName() { return safeName(vals.D85 || vals.D9 || '') || new Date().toISOString().slice(0, 10); }
+  function saveJSON() {
+    commitActive(); saveNow();
+    var doc = { formato: 'master_captura-borrador', plantilla: META.version, modo: modo, guardado: new Date().toISOString(), valores: MC.toDraft(vals) };
+    download('borrador_' + baseName() + '.json', JSON.stringify(doc, null, 2), 'application/json');
+    toast('Borrador descargado como JSON.');
+  }
+  function openJSON(file) {
+    var fr = new FileReader();
+    fr.onload = function () {
+      try {
+        var d = JSON.parse(fr.result);
+        if (d.formato !== 'master_captura-borrador' || typeof d.valores !== 'object' || !d.valores) throw 0;
+        var r = MC.fromDraft(d.valores), id = uid();
+        if (saveT) saveNow();
+        syncStore();
+        drafts[id] = { id: id, upd: new Date().toISOString(), v: MC.toDraft(r.vals), modo: normModo(d.modo) };
+        openDraft(id);
+        var m = 'Borrador abierto como copia nueva.';
+        if (d.plantilla !== META.version) m += ' Fue creado con ' + d.plantilla + '; esta es ' + META.version + '.';
+        if (r.unknown.length) m += ' Se ignoraron ' + r.unknown.length + ' campos desconocidos.';
+        toast(m);
+      } catch (e) { toast('Ese archivo no es un borrador válido de Master Captura.', true); }
+    };
+    fr.readAsText(file);
+  }
+
+  /* ---------- Validación de datos de la plantilla ---------- */
+  function dvError(coord, rawIn) {
+    var sp = MC.cellSpec[coord], raw = (rawIn == null ? vals[coord] || '' : rawIn).trim();
+    if (!raw) return '';
+    var v = MC.typed(coord, raw);
+    if (sp.k === 'list') return !sp.free && sp.o.indexOf(raw) < 0 ? 'Elige un valor de la lista.' : '';
+    if (sp.k === 'num' || sp.k === 'int') {
+      if (typeof v !== 'number') return 'Este campo es numérico: escribe solo la cifra, con punto decimal, sin comas, unidades ni texto.';
+      if (sp.k === 'int' && v !== Math.floor(v)) return 'Debe ser un número entero.';
+      if (sp.op === 'gt' && v <= sp.min) return 'Debe ser mayor que ' + sp.min + '.';
+      if (v < sp.min) return 'No puede ser menor que ' + sp.min + '.';
+      if (sp.max != null && v > sp.max) return 'No puede ser mayor que ' + sp.max + '.';
+    }
+    if (sp.k === 'date') {
+      if (typeof v !== 'number') return 'Escribe una fecha válida.';
+      if (v < sp.min || v > sp.max) return 'Fecha fuera del rango permitido.';
+    }
+    if (sp.k === 'time' && typeof v !== 'number') return 'Escribe la hora como hh:mm (ej. 09:30).';
+    return '';
+  }
+  function level(s) { return !s ? '' : s.indexOf('Error') === 0 ? 'err' : s.indexOf('Falta') === 0 ? 'fal' : s.indexOf('Revisar') === 0 ? 'rev' : ''; }
+  /* Un valor inválido solo puede llegar desde un JSON: la captura normal lo rechaza como Excel. */
+  function compute() {
+    P = MC.review(effVals()); R = {};
+    Object.keys(P).forEach(function (k) { R[k] = P[k]; });
+    Object.keys(MC.cellSpec).forEach(function (c) {
+      if (excluded(c)) return;
+      var e = dvError(c), r = c.replace(/^[A-Z]+/, '');
+      if (e && level(R['L' + r]) !== 'err') R['L' + r] = 'Error: ' + e;
+    });
+  }
+  function issues() {
+    var out = [];
+    SECS.forEach(function (s, si) {
+      if (nuevo() && SECEXCL[si]) return;
+      if (s.kind === 'ut' && level(R.L58)) out.push({ s: s, r: 58, label: 'Lecturas UT', st: R.L58, lv: level(R.L58) });
+      s.rows.forEach(function (r) {
+        if (nuevo() && EXCLROW[r.r]) return;
+        var st = R['L' + r.r], lv = level(st);
+        if (lv) out.push({ s: s, r: r.r, label: r.label, st: st, lv: lv });
+      });
+    });
+    return out;
+  }
+
+  /* ---------- Hoja ---------- */
+  function ctl(coord) {
+    var sp = MC.cellSpec[coord], a = ' id="c_' + coord + '" data-c="' + coord + '" aria-label="' + h((MC.rowOf[coord.replace(/^[A-Z]+/, '')] || {}).label || coord) + ' ' + coord + '"';
+    if (sp.k === 'list') {
+      if (sp.free) return '<input type="text"' + a + ' list="dl_' + coord + '" autocomplete="off"><datalist id="dl_' + coord + '">' + sp.o.map(function (o) { return '<option value="' + h(o) + '">'; }).join('') + '</datalist>';
+      return '<select' + a + '><option value=""></option>' + sp.o.map(function (o) { return '<option>' + h(o) + '</option>'; }).join('') + '</select>';
+    }
+    if (sp.k === 'date') return '<input type="date"' + a + '>';
+    if (sp.k === 'time') return '<input type="time"' + a + '>';
+    if (sp.k === 'num' || sp.k === 'int') return '<input type="text"' + a + ' inputmode="' + (sp.k === 'int' ? 'numeric' : 'decimal') + '" autocomplete="off">';
+    return '<textarea' + a + ' rows="1" autocomplete="off"></textarea>';
+  }
+  function renderSheet() {
+    var cols = META.grid.cols.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('');
+    function row(rw) {
+      return '<tr id="r' + rw.r + '" style="height:' + rw.h + 'pt">' + rw.c.map(function (x) {
+        var co = x.c + rw.r, sp = MC.cellSpec[co], cls = 's' + x.s, inner = '';
+        if (sp) { cls += ' in'; if (sp.k !== 'text' && sp.k !== 'list') cls += ' num'; inner = ctl(co); }
+        else if (x.f) inner = '';
+        else if (x.v != null) inner = h(x.v).replace(/\n/g, '<br>');
+        return '<td id="td_' + co + '" class="' + cls + '"' + (x.n > 1 ? ' colspan="' + x.n + '"' : '') + '>' + inner + '</td>';
+      }).join('') + '</tr>';
+    }
+    var head = META.grid.rows.filter(function (r) { return r.r <= META.grid.freeze; }), body = META.grid.rows.filter(function (r) { return r.r > META.grid.freeze; });
+    $('sheet').innerHTML = '<table class="ws" style="width:' + META.grid.cols.reduce(function (a, b) { return a + b; }, 0) + 'px"><colgroup>' + cols + '</colgroup><thead>' + head.map(row).join('') + '</thead><tbody>' + body.map(row).join('') + '</tbody></table>';
+    /* Celdas con fórmula o formato condicional */
+    styled = [];
+    META.grid.rows.forEach(function (rw) { rw.c.forEach(function (x) { var co = x.c + rw.r; if (MC.hasCF(co) || x.f) styled.push({ co: co, td: $('td_' + co), f: x.f }); }); });
+  }
+  function markEmpty(el, c) { if (el.type === 'date' || el.type === 'time') el.classList.toggle('vac', !vals[c]); }
+  function grow(el) { if (el.tagName === 'TEXTAREA') { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; } }
+  function display(coord) {
+    var sp = MC.cellSpec[coord], v = vals[coord] || '';
+    if (sp.nf === '0.00' && v) { var n = MC.typed(coord, v); if (typeof n === 'number') return n.toFixed(2); }
+    return v;
+  }
+  function fillAll() {
+    Object.keys(MC.cellSpec).forEach(function (c) {
+      var el = $('c_' + c);
+      if (!el) return;
+      el.value = display(c);
+      markEmpty(el, c);
+      if (el.tagName === 'SELECT' && el.value !== (vals[c] || '')) {
+        var o = document.createElement('option'); o.textContent = vals[c]; el.appendChild(o); el.value = vals[c];
+      }
+      grow(el);
+    });
+    refresh();
+  }
+  function refresh() {
+    compute();
+    $('equipo').textContent = draftName(MC.toDraft(vals));
+    var ev = effVals();
+    styled.forEach(function (x) {
+      if (x.f) x.td.textContent = R[x.co] != null ? R[x.co] : '';
+      var l = MC.cfLook(x.co, ev, P);
+      x.td.style.backgroundColor = l.fill ? '#' + l.fill : '';
+      x.td.style.color = l.font ? '#' + l.font : '';
+    });
+    refreshSums();
+  }
+
+  /* ---------- Captura: se confirma al salir de la celda, como en Excel ---------- */
+  var pendingRestore = null;
+  function commit(el) {
+    var c = el.getAttribute('data-c'), raw = el.value, sp = MC.cellSpec[c], e = dvError(c, raw);
+    if (raw.trim() === (vals[c] || '') || (sp.nf === '0.00' && raw === display(c))) return;
+    if (e) {
+      pendingRestore = el;
+      showDialog(sp.et || 'Valor no válido', '<p class="e">' + h(sp.e || e) + '</p>' + (sp.e ? '<p class="note">' + h(e) + '</p>' : '') + '<p style="margin:10px 0 0"><button class="pri" data-d="closeErr">Aceptar</button></p>');
+      return;
+    }
+    if (raw.trim()) vals[c] = sp.k === 'text' ? raw : raw.trim(); else delete vals[c];
+    markEmpty(el, c); grow(el); touch(); refresh();
+  }
+  function commitActive() { var a = document.activeElement; if (a && a.getAttribute && a.getAttribute('data-c')) commit(a); }
+  document.addEventListener('change', function (e) { if (e.target.getAttribute && e.target.getAttribute('data-c')) commit(e.target); });
+  document.addEventListener('input', function (e) { if (e.target.tagName === 'TEXTAREA') grow(e.target); });
+  document.addEventListener('focusin', function (e) {
+    var c = e.target.getAttribute && e.target.getAttribute('data-c');
+    if (!c) return;
+    var sp = MC.cellSpec[c];
+    if (sp.nf) { e.target.value = vals[c] || ''; }
+    var tip = $('tip');
+    if (sp.p) {
+      tip.innerHTML = (sp.pt ? '<b>' + h(sp.pt) + '</b>' : '') + h(sp.p); tip.hidden = false;
+      var b = $('td_' + c).getBoundingClientRect(), w = tip.offsetWidth, ht = tip.offsetHeight;
+      var left = Math.min(Math.max(4, b.left + 8), innerWidth - w - 4), top = b.bottom + 3;
+      if (top + ht > innerHeight - 4) top = Math.max(4, b.top - ht - 3);
+      tip.style.left = left + 'px'; tip.style.top = top + 'px';
+    } else tip.hidden = true;
+  });
+  document.addEventListener('focusout', function (e) {
+    var c = e.target.getAttribute && e.target.getAttribute('data-c');
+    if (!c) return;
+    $('tip').hidden = true;
+    if (MC.cellSpec[c].nf && !pendingRestore) e.target.value = display(c);
+  });
+  document.addEventListener('keydown', function (e) {
+    var el = e.target, c = el.getAttribute && el.getAttribute('data-c');
+    if (!c || e.key !== 'Enter' || el.tagName === 'SELECT') return;
+    if (el.tagName === 'TEXTAREA' && e.altKey) {
+      e.preventDefault();
+      var s = el.selectionStart; el.value = el.value.slice(0, s) + '\n' + el.value.slice(el.selectionEnd); el.selectionStart = el.selectionEnd = s + 1; grow(el); return;
+    }
+    e.preventDefault();
+    var m = /^([A-Z]+)(\d+)$/.exec(c), r = +m[2], step = e.shiftKey ? -1 : 1, nx;
+    el.blur();
+    if (pendingRestore) return;
+    for (var i = 1; i <= 160; i++) { nx = $('c_' + m[1] + (r + step * i)); if (nx && nx.offsetParent) { nx.focus(); return; } }
+  });
+  $('sheet').addEventListener('click', function (e) {
+    var sec = e.target.closest && e.target.closest('tr.sec');
+    if (sec) { var si = +sec.getAttribute('data-sec'); setFold(si, !folded[SECS[si].n]); refreshSums(); return; }
+    var td = e.target.closest && e.target.closest('td.in');
+    if (td && e.target === td) td.querySelector('[data-c]').focus();
+  });
+  /* ---------- Expandir y contraer: solo cambia la vista, nunca los datos ni el Excel ---------- */
+  function secRange(i) {
+    var last = i + 1 < SECS.length ? SECS[i + 1].hr - 1 : META.grid.rows[META.grid.rows.length - 1].r;
+    return [SECS[i].hr + 1, last];
+  }
+  function applyRows(i) {
+    var s = SECS[i], range = secRange(i), off = nuevo() && SECEXCL[i];
+    for (var r = s.hr; r <= range[1]; r++) {
+      var tr = $('r' + r);
+      if (!tr) continue;
+      var hid = off || (r > s.hr && (!!folded[s.n] || (nuevo() && !!EXCLROW[r])));
+      if (tr.hidden && !hid) { tr.hidden = false; tr.querySelectorAll('textarea').forEach(grow); }
+      else tr.hidden = hid;
+    }
+  }
+  function setFold(i, on) {
+    var n = SECS[i].n, btn = $('tg' + n);
+    if (on) folded[n] = 1; else delete folded[n];
+    applyRows(i);
+    btn.textContent = on ? '▸' : '▾';
+    btn.setAttribute('aria-expanded', String(!on));
+    btn.setAttribute('aria-label', (on ? 'Expandir' : 'Contraer') + ' sección ' + n);
+  }
+  function foldAll(on) { SECS.forEach(function (s, i) { setFold(i, on); }); refreshSums(); }
+  function refreshSums() {
+    var by = {};
+    issues().forEach(function (x) { var b = by[x.s.n] = by[x.s.n] || { err: 0, fal: 0, rev: 0 }; b[x.lv]++; });
+    SECS.forEach(function (s) {
+      var e = $('sum' + s.n), b = by[s.n];
+      if (!folded[s.n]) { e.textContent = ''; return; }
+      if (!b) {
+        var ev = effVals(), filled = s.rows.some(function (r) { return r.cells && Object.keys(r.cells).some(function (c) { return (ev[c + r.r] || '').trim(); }); });
+        e.className = 'secsum' + (filled ? ' ok' : ''); e.style.color = filled ? '' : '#808080';
+        e.textContent = filled ? '✔ sin pendientes' : '— en blanco'; return;
+      }
+      e.style.color = '';
+      e.className = 'secsum ' + (b.err ? 'err' : b.fal ? 'fal' : 'rev');
+      e.textContent = [b.err && b.err + ' con error', b.fal && b.fal + ' por capturar', b.rev && b.rev + ' por revisar'].filter(Boolean).join(' · ');
+    });
+  }
+  function initFolds() {
+    SECS.forEach(function (s, i) {
+      var td = $('td_B' + s.hr), tr = $('r' + s.hr);
+      tr.classList.add('sec'); tr.setAttribute('data-sec', i);
+      td.innerHTML = '<button type="button" class="tg" id="tg' + s.n + '"></button>' + td.innerHTML + '<span class="secsum" id="sum' + s.n + '"></span>';
+      setFold(i, true);
+    });
+  }
+  function buildJump() {
+    $('jump').innerHTML = '<option value="">Ir a sección…</option>' + SECS.map(function (s, i) { return nuevo() && SECEXCL[i] ? '' : '<option value="' + s.hr + '">' + s.n + '. ' + h(s.title) + '</option>'; }).join('');
+  }
+  function setModoUI() {
+    $('modo').value = modo;
+    $('modobar').hidden = !nuevo();
+    $('modobar').textContent = 'Equipo nuevo sin pruebas: solo se muestran y se exportan los ' + NUEVO_N + ' datos que el Motor importa para equipo nuevo. Lo demás va en blanco en el Excel.';
+    buildJump();
+    SECS.forEach(function (s, i) { applyRows(i); });
+  }
+  function setModo(m) { modo = normModo(m); setModoUI(); refresh(); touch(); }
+  $('modo').onchange = function () {
+    var m = this.value;
+    if (m !== 'nuevo') { setModo(m); return; }
+    var n = Object.keys(vals).filter(function (c) { return EXCLROW[rowNum(c)] && (vals[c] || '').trim(); }).length;
+    if (!n) { setModo(m); return; }
+    showDialog('Cambiar a equipo nuevo sin pruebas', '<div class="warnbox"><b>Hay ' + n + ' dato(s) capturado(s) que no aplican a equipo nuevo.</b>Por ejemplo, lecturas UT, elementos, zonas o fechas de inspección. Se ocultan y no se exportan al Excel; se conservan en el borrador por si vuelves a «Con pruebas».</div><div class="btns"><button class="pri" data-d="modoOK" data-m="nuevo">Cambiar</button><button data-d="modoNo">Cancelar</button></div>');
+  };
+  function revealRow(r) {
+    SECS.forEach(function (s, i) { var g = secRange(i); if (r >= s.hr && r <= g[1] && folded[s.n]) { setFold(i, false); refreshSums(); } });
+  }
+  function goRow(r, focus) {
+    revealRow(+r);
+    var tr = $('r' + r), sh = $('sheet'), th = sh.querySelector('thead');
+    if (tr) sh.scrollTop = tr.offsetTop - th.offsetHeight - 2;
+    if (focus && $('c_' + focus)) $('c_' + focus).focus({ preventScroll: true });
+  }
+
+  /* ---------- Diálogos ---------- */
+  function showDialog(title, html) { $('dlgT').textContent = title; $('dlgB').innerHTML = html; if (!$('dlg').open) $('dlg').showModal(); }
+  function closeDialog() {
+    $('dlg').close();
+    if (pendingRestore) { var el = pendingRestore, c = el.getAttribute('data-c'); pendingRestore = null; el.value = vals[c] || ''; grow(el); el.focus(); }
+  }
+  $('dlg').addEventListener('close', function () { $('modo').value = modo; if (pendingRestore) closeDialog(); });
+  $('dlgX').onclick = closeDialog;
+  function drawDrafts() {
+    var ids = Object.keys(drafts).sort(function (a, b) { return drafts[b].upd.localeCompare(drafts[a].upd); });
+    showDialog('Borradores en este navegador', '<p class="btns" style="margin:0 0 6px"><button class="pri" data-d="new" data-m="completo">Nuevo · con pruebas</button><button class="pri" data-d="new" data-m="nuevo">Nuevo · equipo nuevo sin pruebas</button></p>' + ids.map(function (id) {
+      var d = drafts[id];
+      return '<div class="dr"><div><b>' + h(draftName(d.v)) + '</b><small>' + (d.modo === 'nuevo' ? 'Equipo nuevo sin pruebas · ' : '') + (id === cur ? 'Abierto · ' : '') + new Date(d.upd).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) + '</small></div><div class="acts">' +
+        (id === cur ? '' : '<button data-d="open" data-id="' + id + '">Abrir</button>') +
+        '<button data-d="dup" data-id="' + id + '" title="Copia para otro equipo del mismo cliente">Duplicar</button>' +
+        '<button data-d="del" data-id="' + id + '">Eliminar</button></div></div>';
+    }).join('') + '<p class="note">Los datos se quedan en este navegador: no se envían a ningún servidor. Si limpias sus datos se pierden; guarda un JSON de lo importante o para pasar a otro equipo.</p>');
+  }
+  function drawGenerate() {
+    compute();
+    var is = issues(), n = { err: 0, fal: 0, rev: 0 };
+    is.forEach(function (i) { n[i.lv]++; });
+    var list = is.map(function (i) { return '<li><button data-d="go" data-row="' + i.r + '">Fila ' + i.r + ' · ' + h(i.label) + ' — <span class="' + i.lv + '">' + h(i.st) + '</span></button></li>'; }).join('');
+    showDialog('Generar master_captura.xlsx', '<p class="sum">' + n.err + ' errores · ' + n.fal + ' faltantes · ' + n.rev + ' por revisar</p>' +
+      (nuevo() ? '<p class="note" style="margin:0 0 8px">Equipo nuevo sin pruebas: el Excel lleva solo los datos que importa el Motor; las demás celdas van en blanco.</p>' : '') +
+      (n.err ? '<p class="e">Corrige los errores para generar el Excel.</p>' : (n.fal || n.rev) ? '<div class="warnbox"><b>Advertencia: la captura no está completa.</b>Si generas el Excel ahora, los pendientes quedarán marcados en la columna «Revisión» y la macro los encontrará al importar.</div>' : '') +
+      '<button class="pri" data-d="gen"' + (n.err ? ' disabled' : '') + '>' + (!n.err && (n.fal || n.rev) ? 'Generar de todos modos' : 'Generar Excel') + '</button>' + (list ? '<ul class="iss">' + list + '</ul>' : ''));
+  }
+  $('dlgB').addEventListener('click', function (e) {
+    var t = e.target.closest('button[data-d]');
+    if (!t) return;
+    var a = t.getAttribute('data-d'), id = t.getAttribute('data-id'), n;
+    if (a === 'closeErr') closeDialog();
+    if (a === 'modoOK') { $('dlg').close(); setModo(t.getAttribute('data-m')); return; }
+    if (a === 'modoNo') { $('dlg').close(); $('modo').value = modo; return; }
+    if (a === 'new') { n = uid(); drafts[n] = { id: n, upd: new Date().toISOString(), v: {}, modo: normModo(t.getAttribute('data-m')) }; $('dlg').close(); openDraft(n); }
+    if (a === 'open') { $('dlg').close(); openDraft(id); }
+    if (a === 'dup') {
+      showDialog('Duplicar borrador', '<div class="warnbox"><b>Se copiará todo, también las mediciones del equipo original.</b>Antes de generar el Excel, actualiza TAG, serie, espesores, evidencia de material y fechas del nuevo equipo.</div><p style="margin:0">' + h(draftName(drafts[id].v)) + '</p><div class="btns"><button class="pri" data-d="dupOK" data-id="' + id + '">Duplicar</button><button data-d="dupNo">Cancelar</button></div>');
+      return;
+    }
+    if (a === 'dupNo') { drawDrafts(); return; }
+    if (a === 'dupOK') { n = uid(); drafts[n] = { id: n, upd: new Date().toISOString(), v: JSON.parse(JSON.stringify(drafts[id].v)), modo: drafts[id].modo }; $('dlg').close(); openDraft(n); toast('Copia creada. Actualiza TAG, serie y mediciones del nuevo equipo.'); }
+    if (a === 'del') {
+      if (t.getAttribute('data-sure') !== '1') { t.setAttribute('data-sure', '1'); t.textContent = '¿Seguro?'; t.classList.add('danger'); return; }
+      delete drafts[id];
+      if (id === cur) {
+        var rest = Object.keys(drafts);
+        if (rest.length) cur = rest[0]; else { cur = uid(); drafts[cur] = { id: cur, upd: new Date().toISOString(), v: {} }; }
+        writeStore(); vals = MC.fromDraft(drafts[cur].v).vals; modo = normModo(drafts[cur].modo); setModoUI(); fillAll();
+      } else writeStore();
+      drawDrafts();
+    }
+    if (a === 'go') {
+      var r = t.getAttribute('data-row'), rr = MC.rowOf[r], target = 'D' + r;
+      if (rr && rr.cells) Object.keys(rr.cells).some(function (cc) { if (!(vals[cc + r] || '').trim()) { target = cc + r; return true; } });
+      $('dlg').close(); goRow(r, target);
+    }
+    if (a === 'gen') {
+      saveNow();
+      download('master_captura_' + baseName() + '.xlsx', MC.buildXlsx(effVals()), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      $('dlg').close(); toast('Excel generado.');
+    }
+  });
+  $('bExpand').onclick = function () { foldAll(false); };
+  $('bCollapse').onclick = function () { commitActive(); if (!pendingRestore) foldAll(true); };
+  $('bSave').onclick = saveJSON;
+  $('bOpen').onclick = function () { $('file').value = ''; $('file').click(); };
+  $('file').onchange = function () { if (this.files[0]) openJSON(this.files[0]); };
+  $('bGen').onclick = function () { commitActive(); if (!pendingRestore) drawGenerate(); };
+  $('bDrafts').onclick = function () { commitActive(); if (pendingRestore) return; saveNow(); syncStore(); drawDrafts(); };
+  $('jump').onchange = function () { if (this.value) goRow(+this.value); this.value = ''; };
+  window.addEventListener('beforeunload', function () { commitActive(); if (saveT) saveNow(); });
+
+  /* ---------- Otra pestaña abierta: el navegador libera el candado solo al cerrarla ---------- */
+  (function () {
+    if (!navigator.locks || !navigator.locks.request) return;
+    var name = 'mc_tab_' + uid();
+    navigator.locks.request(name, function () { return new Promise(function () {}); });
+    function check() {
+      navigator.locks.query().then(function (q) {
+        $('tabbar').hidden = q.held.filter(function (l) { return l.name.indexOf('mc_tab_') === 0; }).length < 2;
+      });
+    }
+    setInterval(check, 3000);
+    document.addEventListener('visibilitychange', check);
+    setTimeout(check, 300);
+  })();
+
+  /* ---------- Arranque ---------- */
+  readStore();
+  if (!storageOK) $('warnbar').hidden = false;
+  if (!cur || !drafts[cur]) {
+    var ids = Object.keys(drafts).sort(function (a, b) { return drafts[b].upd.localeCompare(drafts[a].upd); });
+    cur = ids[0] || uid();
+    if (!drafts[cur]) drafts[cur] = { id: cur, upd: new Date().toISOString(), v: {} };
+    writeStore();
+  }
+  vals = MC.fromDraft(drafts[cur].v).vals;
+  modo = normModo(drafts[cur].modo);
+  renderSheet();
+  initFolds();
+  setModoUI();
+  fillAll();
+})();
+</script>
+</body>
+</html>
